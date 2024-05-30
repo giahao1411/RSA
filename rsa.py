@@ -18,7 +18,7 @@ def isPrime(n):
 # Get p and q randomly, note that p and q are primes so we check before get them
 def get_p_and_q():
     # add integer 0 to n into primes list, this make it easily to get the random prime
-    primes = [i for i in range(0, 1000) if isPrime(i)]
+    primes = [i for i in range(0, 1000000) if isPrime(i)]
 
     # get p and q properly
     p = random.choice(primes)
@@ -105,6 +105,7 @@ def base64_private_key(private_key):
 """
 To encrypt a message using RSA, we firstly have e and n for encryption
 Next we can get the ciphertext from the plain text by
+
 C = m^e mod n
 
 Firstly, we convert the message character into integer in ASCII values. 
@@ -112,6 +113,7 @@ For each character, we encrypt using the given mathematical
 """
 
 
+# encryption function
 def encryption(message, public_key):
     e, n = public_key
     char_message = [ord(character) for character in message]
@@ -129,10 +131,12 @@ def encryption(message, public_key):
 """
 To decrypt a message using RSA, we firstly have d and n for decryption
 Next we can get the plain text from the given cipher text by
+
 m = C^d mod n
 """
 
 
+# decryption function
 def decryption(encrypted_message_integer, private_key):
     d, n = private_key
     decrypted_char_message = [pow(c, d, n) for c in encrypted_message_integer]
