@@ -97,12 +97,12 @@ def base64_key(key):
 
 """
 To encrypt a message using RSA, we firstly have e and n for encryption
-Next we can get the ciphertext from the plain text by
+Next we can get the cipher text from the plain text by
 
 C = m^e mod n
 
 Firstly, we convert the message character into integer in ASCII values. 
-For each character, we encrypt using the given mathematical
+For each character, we encrypt using the given mathematical definition
 """
 
 
