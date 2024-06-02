@@ -1,28 +1,19 @@
-import math
-import random
 import base64
-from inverse_modulo import extended_euclidean
-from inverse_modulo import inverse_modulo
+import sympy as sp
+from modulo_inverse import extended_euclidean, modulo_inverse
 
 
-# check if number is prime
-def isPrime(n):
-    if n <= 1:
-        return False
-    for i in range(2, int(math.sqrt(n) + 1)):
-        if n % i == 0:
-            return False
-    return True
+# Generate primes randomly
+def generate_rand_prime(bit_length):
+    return sp.randprime(2 ** (bit_length - 1), 2**bit_length)
 
 
 # Get p and q randomly, note that p and q are primes so we check before get them
-def get_p_and_q():
-    # add integer 0 to n into primes list, this make it easily to get the random prime
-    primes = [i for i in range(0, 1000000) if isPrime(i)]
+def get_p_and_q(bit_length):
+    # Get random primes for p and q, otherwise calculate n for checking condition
+    p = generate_rand_prime(bit_length)
+    q = generate_rand_prime(bit_length)
 
-    # get p and q properly
-    p = random.choice(primes)
-    q = random.choice(primes)
     return p, q
 
 
@@ -45,15 +36,23 @@ number e is less than n (modulus), such that n is relatively prime to (p - 1) * 
 have no common factor except 1 which is GCD(e, phiN) = 1
 
 e is defined by 1 < e < Φ(n)
+
+But in this program, I will choose the most common exponent e = 65537 for encrypt 
 """
 
 
 # Get encryption key e
-def prime_e(phiN):
-    for i in range(2, phiN):
-        gcd, x, y = extended_euclidean(i, phiN)
-        if gcd == 1:
-            return i
+def get_exponent_e(phiN):
+    # Using a common set of prime numbers for efficiency
+    common_primes = [3, 5, 17, 257, 65537]
+    for e in common_primes:
+        if extended_euclidean(e, phiN)[0] == 1:
+            return e
+
+    # Back to custome search if common primes are not suitable
+    for e in range(2, phiN):
+        if extended_euclidean(e, phiN)[0] == 1:
+            return e
     return -1
 
 
@@ -66,24 +65,18 @@ which is d is the inverse modulo of e mod Φ(n). We reuse the pre-defined functi
 
 # Get decryption key
 def get_d(e, phiN):
-    return inverse_modulo(e, phiN)
+    return modulo_inverse(e, phiN)
 
 
 # public key taking e and n (e, n)
 def get_public_key(p, q):
     n = get_modulus(p, q)
     phi_n = phiN(p, q)
-    e = prime_e(phi_n)
+    e = get_exponent_e(phi_n)
+
+    # Most common exponent e
+    # e = 65537
     return (e, n)
-
-
-def base64_public_key(public_key):
-    e, n = public_key
-    e_bytes = e.to_bytes((e.bit_length() + 7) // 8, byteorder="big")
-    n_bytes = n.to_bytes((n.bit_length() + 7) // 8, byteorder="big")
-    key_bytes = e_bytes + n_bytes
-    base64_public_key = base64.b64encode(key_bytes).decode("utf-8")
-    return base64_public_key
 
 
 # private key taking d and n (d, n)
@@ -93,13 +86,13 @@ def get_private_key(p, q, e):
     return (d, get_modulus(p, q))
 
 
-def base64_private_key(private_key):
-    d, n = private_key
-    d_bytes = d.to_bytes((d.bit_length() + 7) // 8, byteorder="big")
-    n_bytes = n.to_bytes((n.bit_length() + 7) // 8, byteorder="big")
-    key_bytes = d_bytes + n_bytes
-    base64_private_key = base64.b64encode(key_bytes).decode("utf-8")
-    return base64_private_key
+# Convert keys to base64
+def base64_key(key):
+    a, b = key
+    a_bytes = a.to_bytes((a.bit_length() + 7) // 8, byteorder="big")
+    b_bytes = b.to_bytes((b.bit_length() + 7) // 8, byteorder="big")
+    key_bytes = a_bytes + b_bytes
+    return base64.b64encode(key_bytes).decode("utf-8")
 
 
 """
@@ -145,21 +138,24 @@ def decryption(encrypted_message_integer, private_key):
 
 
 def main():
-    p, q = get_p_and_q()
+    bit_length = 2048
+    p, q = get_p_and_q(bit_length)
     public_key = get_public_key(p, q)
     private_key = get_private_key(p, q, public_key[0])
 
-    print(base64_public_key(public_key))
-    print(base64_private_key(private_key))
+    # public_key, private_key = get_key_pairs(2048)
+
+    print("PUBLIC KEY:\n", base64_key(public_key), "\n")
+    print("PRIVATE KEY:\n", base64_key(private_key), "\n")
 
     message = "Xin chao"
-    print(f"Original message: {message}")
+    print(f"Original message:\n {message}\n")
 
     encrypted_message, encrypted_message_integer = encryption(message, public_key)
-    print(f"Encrypted message: {encrypted_message}")
+    print(f"Encrypted message:\n {encrypted_message}\n")
 
     decrypted_message = decryption(encrypted_message_integer, private_key)
-    print(f"Decrypted message: {decrypted_message}")
+    print(f"Decrypted message:\n {decrypted_message}\n")
 
 
 if __name__ == "__main__":
