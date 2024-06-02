@@ -3,14 +3,14 @@ import sympy as sp
 from modulo_inverse import extended_euclidean, modulo_inverse
 
 
-# Generate primes randomly
+# Generate primes randomly using sympy randprime
 def generate_rand_prime(bit_length):
     return sp.randprime(2 ** (bit_length - 1), 2**bit_length)
 
 
 # Get p and q randomly, note that p and q are primes so we check before get them
 def get_p_and_q(bit_length):
-    # Get random primes for p and q, otherwise calculate n for checking condition
+    # Get random primes for p and q in given bit length
     p = generate_rand_prime(bit_length)
     q = generate_rand_prime(bit_length)
 
@@ -28,7 +28,7 @@ def phiN(p, q):
 
 
 """
-prime_e often starts with e ∈ {3, 5, 17, 257, 65537} which are special primes
+exponent_e often starts with e ∈ {3, 5, 17, 257, 65537} which are special primes
 These exponents have computational benefits as they are of the form 2k + 1
 But for small exponents, especially e = 3, it will be easily for being attacked
 
@@ -37,7 +37,7 @@ have no common factor except 1 which is GCD(e, phiN) = 1
 
 e is defined by 1 < e < Φ(n)
 
-But in this program, I will choose the most common exponent e = 65537 for encrypt 
+The most common exponent e = 65537 for encryption for the higher security 
 """
 
 
