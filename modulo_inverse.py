@@ -23,5 +23,4 @@ def modulo_inverse(a, m):
     else:
         return x % m
 
-
-print(modulo_inverse(4, 1000000))
+print(modulo_inverse(323, 17))
