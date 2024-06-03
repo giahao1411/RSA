@@ -1,3 +1,4 @@
+import time
 import base64
 import sympy as sp
 from modulo_inverse import extended_euclidean, modulo_inverse
@@ -137,25 +138,71 @@ def decryption(encrypted_message_integer, private_key):
     return decrypted_message
 
 
+def measure_time(message, public_key, private_key):
+    start_enc = time.perf_counter()
+    _, encrypted_message_integer = encryption(message, public_key)
+    end_enc = time.perf_counter()
+
+    start_dec = time.perf_counter()
+    _ = decryption(encrypted_message_integer, private_key)
+    end_dec = time.perf_counter()
+
+    enc_time = end_enc - start_enc
+    dec_time = end_dec - start_dec
+
+    return enc_time, dec_time
+
+
+def write_data_to_file(filename, data):
+    with open(filename, "a") as file:
+        length, enc_time, dec_time = data
+        file.write(f"{length}|{enc_time:.6f}|{dec_time:.6f}\n")
+
+
+def write_information(filename, data):
+    with open(filename, "a") as file:
+        public_key, private_key, original_msg, encrpyted_msg, decrypted_msg = data
+        file.write(
+            f"---PUBLIC KEY---\n{public_key}\n"
+            f"\n---PRIVATE KEY---\n{private_key}\n"
+            f"\n---ORIGINAL MESSAGE---\n{original_msg}\n"
+            f"\n---ENCRYPTED MESSAGE---\n{encrpyted_msg}\n"
+            f"\n---DECRYPTED MESSAGE---\n{decrypted_msg}\n"
+            "\n-----------------------------------------------\n\n"
+        )
+
+
 def main():
     bit_length = 2048
     p, q = get_p_and_q(bit_length)
     public_key = get_public_key(p, q)
     private_key = get_private_key(p, q, public_key[0])
 
-    # public_key, private_key = get_key_pairs(2048)
+    # Original message
+    message = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit. Phasellus gravida semper nisi. Nullam vel sem. Pellentesque libero tortor, tincidunt et, tincidunt eget, semper nec, quam. Sed hendrerit. Morbi ac felis. Nunc egestas, augue at pellentesque laoreet, felis eros vehicula leo, at malesuada velit leo quis pede. Donec interdum, metus et hendrerit aliquet, dolor diam sagittis ligula, eget egestas libero turpis vel mi. Nunc nulla. Fusce risus nisl, viverra et, tempor et, pretium in, sapien. Donec venenatis vulputate lorem. Morbi nec metus. Phasellus blandit leo ut odio. Maecenas ullamcorper, dui et placerat feugiat, eros pede varius nisi, condimentum viverra felis nunc et lorem. Sed magna purus, fermentum eu, tincidunt eu, varius ut, felis. In auctor lobortis lacus. Quisque libero metus, condimentum nec, tempor a, commodo mollis, magna. Vestibulum ullamcorper mauris at ligul"
 
-    print("PUBLIC KEY:\n", base64_key(public_key), "\n")
-    print("PRIVATE KEY:\n", base64_key(private_key), "\n")
-
-    message = "Xin chao"
-    print(f"Original message:\n {message}\n")
-
+    # Encrypted message
     encrypted_message, encrypted_message_integer = encryption(message, public_key)
-    print(f"Encrypted message:\n {encrypted_message}\n")
 
+    # Decrypted message
     decrypted_message = decryption(encrypted_message_integer, private_key)
-    print(f"Decrypted message:\n {decrypted_message}\n")
+
+    # Calculate time of encrypt and decrypt
+    enc_time, dec_time = measure_time(message, public_key, private_key)
+
+    # Data setting for write to files
+    message_data = [
+        base64_key(public_key),
+        base64_key(private_key),
+        message,
+        encrypted_message,
+        decrypted_message,
+    ]
+    data = [len(message), enc_time, dec_time]
+
+    # Perform write to files
+    write_information("keys_and_messages.txt", message_data)
+    write_data_to_file("result_data.txt", data)
 
 
 if __name__ == "__main__":
